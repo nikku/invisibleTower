@@ -9,33 +9,37 @@
  *
  */
 
+var VIEWPORT = { width: 640, height: 320 };
+var GRID = { x: 19, y: 9, width: 30 };
+
+var TOWER_TYPES = [ 'BOW', 'BOMB' ];
+
 var StateGameRun = CGSGObject.extend(
   {
     initialize: function (context, parent) {
       this.context = context;
       this.image = null;
       this.game = parent;
-      this.columns = 19;
-      this.rows = 9;
+      this.bees = [];
 
       // 0 = wall, 1 = open
-      var map = this.map = [
-       [42,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0],
-         [0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0],
-         [0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0],
-         [0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,43],
-         [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
-         [0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0],
-         [0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0],
-         [0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0]
+      var field = this.map = [
+        [42,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0],
+        [1,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0],
+        [0,0,1,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0],
+        [0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,43],
+        [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+        [0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0],
+        [0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0],
+        [0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0]
       ];
 
-      var graph = this.graph = new Graph(map);
-      var start = graph.nodes[0][0];
-      var end = graph.nodes[3][18];
-      var result = astar.search(graph.nodes, start, end, true);
-      console.log(result);
+      var graph = this.graph = new Graph(field);
+      var start = this.start = graph.nodes[0][0];
+      var end = this.end = graph.nodes[3][18];
+
+      var map = this.map = {field : field, "graph" :  this.graph, sourcePos : start, targetPos : end};
 
       this._createEnvironment();
     },
@@ -46,14 +50,11 @@ var StateGameRun = CGSGObject.extend(
     run: function () {
       this.initGame();
 
-      for (var c = 0; c < this.maxClouds; c++) {
-        this.clouds[c].start();
-      }
-
-      for (var b = 0; b < this.maxBees; b++) {
+      for (var b = 0; b < this.bees.length; b++) {
         this.bees[b].setImage(this.image);
       }
 
+      this.bees[0].start();
       this.updateScore(this.score);
     },
 
@@ -61,19 +62,6 @@ var StateGameRun = CGSGObject.extend(
      * called each frame, just before the rendering process
      */
     onRenderStartHandler: function () {
-      if (this.nbBees < this.maxBees && (cgsgCurrentFrame % 900) == 0) {
-        //this.gameNode.addChild(this.bees[this.nbBees]);
-        this.bees[this.nbBees].start();
-        this.nbBees++;
-      }
-
-      if (this.isRunning === true && this.nbFlowers < this.maxFlowers && (cgsgCurrentFrame % 500) == 0) {
-        var flower = this.flowers[this.nbFlowers];
-        flower.isVisible = true;
-        flower.start();
-        this.nbFlowers++;
-      }
-
       currentColorLerp += 0.001;
       if (currentColorLerp >= 1) {
         currentColorLerp = 0;
@@ -111,37 +99,135 @@ var StateGameRun = CGSGObject.extend(
      * @private
      */
     _createGameEnvironment: function () {
-        this.gameNode = new CGSGNode(0, 0, 1, 1);
-        this.rootNode.addChild(this.gameNode);
+      this.gameNode = new CGSGNode(0, 0, 1, 1);
+      this.rootNode.addChild(this.gameNode);
 
-        for (var index = 0; index < this.map.length; index++) {
-            var row = this.map[index];
-            for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
-                var cellType = row[rowIndex];
-                var width = 30;
-                var cellNode = new CGSGNodeSquare(rowIndex * width, index * width, width, width);
-                cellNode.globalAlpha = 0.8;
-                cellNode.color = cellType == 0 ? "lightgray" : "fuchsia";
-                cellNode.lineWidth = 2;
-                cellNode.lineColor = "gray";
-                this.gameNode.addChild(cellNode);
+      this._createGameGrid(this.gameNode);
+      this._createHud(this.gameNode);
 
-								switch (cellType) {
-									case 0:
-										cellNode.addChild(new WallNode());
-										break;
-									case 42:
-										cellNode.addChild(new StartPointNode());
-										break;
-									case 43:
-										cellNode.addChild(new TowerNode());
-										break;
-								}
-            }
+      var bee = new AttackerNode(0, 0, this.map, this.context, this, 1);
+      this.bees.push(bee);
+
+      this.gameNode.addChild(bee);
+    },
+
+    _createGameGrid: function(gameNode) {
+
+      this.gridNode = new CGSGNode(0, 0, GRID.x * GRID.width, GRID.y * GRID.width);
+      gameNode.addChild(this.gridNode);
+
+      for (var index = 0; index < this.map.field.length; index++) {
+        var row = this.map.field[index];
+        for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
+          var cellType = row[rowIndex];
+          var width = GRID.width;
+          var cellNode = new CellNode(rowIndex * width, index * width, width, width);
+          cellNode.color = cellType == 0 ? "lightgray" : "fuchsia";
+          this.gridNode.addChild(cellNode);
+
+          switch (cellType) {
+            case 0:
+              cellNode.addChild(new WallNode());
+              break;
+            case 42:
+              cellNode.addChild(new StartPointNode());
+              break;
+            case 43:
+              cellNode.addChild(new TowerNode());
+              break;
+          }
         }
+      }
 
-      	var startButton = new NewButtonNode(580, 10, 50, 20, '(Re)Start');
-      	this.gameNode.addChild(startButton);
+      var startButton = new NewButtonNode(580, 10, 50, 20, '(Re)Start');
+      this.gameNode.addChild(startButton);
+    },
+
+    _createHud: function(gameNode) {
+
+      var self = this;
+
+      // total display size: 640 * 320
+      // grid size: 19 * 9
+
+      this.hudNode = new CGSGNode(0, GRID.y * GRID.width, VIEWPORT.width, VIEWPORT.height - GRID.y * GRID.width);
+
+      gameNode.addChild(this.hudNode);
+
+      for (var i = 0; i < TOWER_TYPES.length; i++) {
+        var width = GRID.width;
+        var node = new CGSGNodeSquare(5 + i*width, 5, width, width);
+        var towerType = TOWER_TYPES[i];
+
+        node.globalAlpha = 0.8;
+        node.color = "lightgray";
+
+        node.onClick = function(e) {
+          self.selectCreateTower(e, towerType);
+        };
+
+        this.hudNode.addChild(node);
+      }
+    },
+
+    selectCreateTower: function(e, towerType) {
+      this.createDragTower(towerType);
+    },
+
+    cancelCreateTower: function() {
+      this.createTowerDragger._parentNode.removeChild(this.createTowerDragger);
+    },
+
+    updateCreateTowerDragger: function(e) {
+      var dragger = this.createTowerDragger;
+
+      var target = this.gridNode.pickNode({ x: e.x, y: e.y }, null, null, true, function(node) {
+        return node.classType == 'CellNode';
+      });
+
+      if (target) {
+        dragger.translateTo(target.position.x, target.position.y);
+        if (target.tower) {
+          dragger.color = "red";
+          dragger.target = null;
+        } else {
+          dragger.color = "green";
+          dragger.target = target;
+        }
+      }
+    },
+
+    buildTower: function(node) {
+      node._parentNode.detachChild(node);
+
+      var target = node.target;
+      node.target = null;
+
+      target.addChild(node);
+      node.translateTo(0, 0);
+
+      target.tower = node;
+      this.createTowerDragger = null;
+    },
+
+    createDragTower: function(towerType) {
+      if (this.createTowerDragger) {
+        this.cancelCreateTower();
+      }
+
+      var dragger = this.createTowerDragger = new CGSGNodeSquare(0, 0, 30, 30);
+      dragger.color = "yellow";
+      dragger.globalAlpha = 0.3;
+
+      var self = this;
+
+      dragger.onClick = function() {
+        if (dragger.target) {
+          self.buildTower(dragger);
+        }
+      };
+
+      this.gridNode.addChild(dragger);
     },
 
     /**
@@ -156,8 +242,8 @@ var StateGameRun = CGSGObject.extend(
       var wButton = 130;
       var hButton = 40;
       this.buttonGoBack =
-      new ButtonNode(CGSGMath.fixedPoint((cgsgCanvas.width - wButton - 10) / 2.0),
-               CGSGMath.fixedPoint((cgsgCanvas.height - hButton) / 1.5), wButton, hButton, 10);
+        new ButtonNode(CGSGMath.fixedPoint((cgsgCanvas.width - wButton - 10) / 2.0),
+          CGSGMath.fixedPoint((cgsgCanvas.height - hButton) / 1.5), wButton, hButton, 10);
       this.loseNode.addChild(this.buttonGoBack);
 
       var textGoBack = new CGSGNodeText(28, 18, "Go Home");
@@ -188,6 +274,12 @@ var StateGameRun = CGSGObject.extend(
       this.game.changeGameState(GAME_STATE.HOME);
     },
 
+    onMouseMove: function(e) {
+      if (this.createTowerDragger) {
+        this.updateCreateTowerDragger(e);
+      }
+    },
+
     /**
      * init a new game
      */
@@ -195,23 +287,24 @@ var StateGameRun = CGSGObject.extend(
       this.rootNode.detachChild(this.loseNode);
       this.rootNode.addChild(this.gameNode);
       this.score = 0;
+
       /*this.nbLive = maxLive;
-      this.speed = 1;
+       this.speed = 1;
 
-      this.nbBees = 0;
-      this.nbFlowers = 0;
+       this.nbBees = 0;
+       this.nbFlowers = 0;
 
-      for (var f = 0; f < this.flowers.length; f++) {
-        this.flowers[f].isVisible = false;
-      }
+       for (var f = 0; f < this.flowers.length; f++) {
+       this.flowers[f].isVisible = false;
+       }
 
-      this.rootNode.reStartAnim();
-      currentColorLerp = 0;
-      currentColorIndex = 0;
-      this.isRunning = true;
+       this.rootNode.reStartAnim();
+       currentColorLerp = 0;
+       currentColorIndex = 0;
+       this.isRunning = true;
 
-      this.updateScore();
-      this.liveNode.reinit();*/
+       this.updateScore();
+       this.liveNode.reinit();*/
     },
 
     onKeyDown: function (event) {
@@ -227,6 +320,13 @@ var StateGameRun = CGSGObject.extend(
         case 39: //right
           break;
         case 40: //down
+          break;
+        case 27: // esc
+          if (this.createTowerDragger) {
+            this.cancelCreateTower();
+          } else {
+            // show menu?
+          }
           break;
       }
 

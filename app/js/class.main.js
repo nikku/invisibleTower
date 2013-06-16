@@ -114,6 +114,12 @@ var CGMain = CGSGScene.extend(
       this.gameState.instance.onRenderStartHandler();
     },
 
+    onMouseMove: function(event) {
+      if (this.gameState.instance.onMouseMove) {
+        this.gameState.instance.onMouseMove(event);
+      }
+    },
+
     onKeyDown: function (event) {
       this.gameState.instance.onKeyDown(event);
       //call the parent handler
