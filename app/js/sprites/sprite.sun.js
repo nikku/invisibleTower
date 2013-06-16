@@ -30,80 +30,80 @@
  *
  */
 var SunNode = CGSGNode.extend(
-	{
-		initialize: function (x, y) {
-			//call the initialize of the parent
-			this._super(x, y, cgsgCanvas.width, cgsgCanvas.height);
+  {
+    initialize: function (x, y) {
+      //call the initialize of the parent
+      this._super(x, y, cgsgCanvas.width, cgsgCanvas.height);
 
-			//define the classType with the name of the class
-			this.classType = "SunNode";
+      //define the classType with the name of the class
+      this.classType = "SunNode";
 
-			//fake canvas to pre-render static display
-			this._tmpCanvas = null;
+      //fake canvas to pre-render static display
+      this._tmpCanvas = null;
 
-			this.initShape();
+      this.initShape();
 
-			this.isClickable = false;
-		},
+      this.isClickable = false;
+    },
 
-		/**
-		 * Pre-render the cloud into a temp canvas to optimize the perfs
-		 */
-		initShape: function () {
-			this._tmpCanvas = document.createElement('canvas');
-			this._tmpCanvas.width = cgsgCanvas.width;
-			this._tmpCanvas.height = cgsgCanvas.height;
-			var tmpContext = this._tmpCanvas.getContext('2d');
+    /**
+     * Pre-render the cloud into a temp canvas to optimize the perfs
+     */
+    initShape: function () {
+      this._tmpCanvas = document.createElement('canvas');
+      this._tmpCanvas.width = cgsgCanvas.width;
+      this._tmpCanvas.height = cgsgCanvas.height;
+      var tmpContext = this._tmpCanvas.getContext('2d');
 
-			tmpContext.strokeStyle = "#fdf9d0";
+      tmpContext.strokeStyle = "#fdf9d0";
 
-			var center = {x: CGSGMath.fixedPoint(cgsgCanvas.width / 2.0),
-				y          : CGSGMath.fixedPoint(cgsgCanvas.height * 0.66667)};
+      var center = {x: CGSGMath.fixedPoint(cgsgCanvas.width / 2.0),
+        y          : CGSGMath.fixedPoint(cgsgCanvas.height * 0.66667)};
 
-			tmpContext.shadowColor = "#fffce0";
-			tmpContext.shadowBlur = 40;
-			tmpContext.shadowOffsetX = 0;
-			tmpContext.shadowOffsetY = 0;
+      tmpContext.shadowColor = "#fffce0";
+      tmpContext.shadowBlur = 40;
+      tmpContext.shadowOffsetX = 0;
+      tmpContext.shadowOffsetY = 0;
 
-			//first circle in the center
-			tmpContext.globalAlpha = 0.4;
-			tmpContext.lineWidth = cgsgCanvas.width / 16;
-			tmpContext.beginPath();
-			tmpContext.arc(center.x, center.y, cgsgCanvas.height / 8.5, 0, CGSGMath.PI2, true);
-			tmpContext.stroke();
+      //first circle in the center
+      tmpContext.globalAlpha = 0.4;
+      tmpContext.lineWidth = cgsgCanvas.width / 16;
+      tmpContext.beginPath();
+      tmpContext.arc(center.x, center.y, cgsgCanvas.height / 8.5, 0, CGSGMath.PI2, true);
+      tmpContext.stroke();
 
-			tmpContext.globalAlpha = 0.17;
-			tmpContext.lineWidth = cgsgCanvas.width / 12;
-			tmpContext.beginPath();
-			tmpContext.arc(center.x, center.y, cgsgCanvas.height / 3.5, 0, CGSGMath.PI2, true);
-			tmpContext.stroke();
+      tmpContext.globalAlpha = 0.17;
+      tmpContext.lineWidth = cgsgCanvas.width / 12;
+      tmpContext.beginPath();
+      tmpContext.arc(center.x, center.y, cgsgCanvas.height / 3.5, 0, CGSGMath.PI2, true);
+      tmpContext.stroke();
 
-			//third circle in the exterior
-			tmpContext.globalAlpha = 0.1;
-			tmpContext.lineWidth = cgsgCanvas.width / 8;
-			tmpContext.beginPath();
-			tmpContext.arc(center.x, center.y, cgsgCanvas.height / 2.0, 0, CGSGMath.PI2, true);
-			tmpContext.stroke();
+      //third circle in the exterior
+      tmpContext.globalAlpha = 0.1;
+      tmpContext.lineWidth = cgsgCanvas.width / 8;
+      tmpContext.beginPath();
+      tmpContext.arc(center.x, center.y, cgsgCanvas.height / 2.0, 0, CGSGMath.PI2, true);
+      tmpContext.stroke();
 
-			tmpContext.shadowBlur = 0;
-		},
+      tmpContext.shadowBlur = 0;
+    },
 
-		/**
-		 * Must be defined to allow the scene graph to render the image nodes
-		 * */
-		render: function (context) {
-			//save current state
-			//always call it
-			this.beforeRender(context);
+    /**
+     * Must be defined to allow the scene graph to render the image nodes
+     * */
+    render: function (context) {
+      //save current state
+      //always call it
+      this.beforeRender(context);
 
-			context.globalAlpha = this.globalAlpha;
+      context.globalAlpha = this.globalAlpha;
 
-			//render the pre-rendered canvas
-			context.drawImage(this._tmpCanvas, 0, 0);
+      //render the pre-rendered canvas
+      context.drawImage(this._tmpCanvas, 0, 0);
 
-			//restore state
-			//always call it
-			this.afterRender(context);
-		}
-	}
+      //restore state
+      //always call it
+      this.afterRender(context);
+    }
+  }
 );

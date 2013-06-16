@@ -9,44 +9,44 @@
  *
  */
 var StateLoading = CGSGObject.extend(
-	{
-		initialize: function (context) {
+  {
+    initialize: function (context) {
 
-			this._createEnvironment();
-		},
+      this._createEnvironment();
+    },
 
-		_createEnvironment: function () {
-			this.rootNode = new SkyNode(0, 0, cgsgCanvas.width, cgsgCanvas.height, this.context);
+    _createEnvironment: function () {
+      this.rootNode = new SkyNode(0, 0, cgsgCanvas.width, cgsgCanvas.height, this.context);
 
-			var floor = new FloorNode(0, 0, 1, 1);
-			this.rootNode.addChild(floor);
+      var floor = new FloorNode(0, 0, 1, 1);
+      this.rootNode.addChild(floor);
 
-			this.text = new CGSGNodeText(0, 0, "LOADING...");
-			this.text.color = "#3322DE";
-		},
+      this.text = new CGSGNodeText(0, 0, "LOADING...");
+      this.text.color = "#3322DE";
+    },
 
-		/**
-		 * called each time this state is activated
-		 */
-		run: function () {
+    /**
+     * called each time this state is activated
+     */
+    run: function () {
 
-		},
+    },
 
-		/**
-		 * called each frame
-		 */
-		onRenderStartHandler: function () {
-		},
+    /**
+     * called each frame
+     */
+    onRenderStartHandler: function () {
+    },
 
-		onKeyDown: function (event) {
-			var keynum = (window.event) ? event.keyCode : event.which;
-		},
+    onKeyDown: function (event) {
+      var keynum = (window.event) ? event.keyCode : event.which;
+    },
 
-		onKeyUp: function (event) {
+    onKeyUp: function (event) {
 
-		},
+    },
 
-		setImage: function (image) {
-		}
-	}
+    setImage: function (image) {
+    }
+  }
 );

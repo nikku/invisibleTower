@@ -31,35 +31,35 @@
  */
 
 var LiveNode = CGSGNode.extend(
-	{
-		initialize: function (x, y) {
-			//call the initialize of the parent
-			this._super(x, y, 20, 20);
+  {
+    initialize: function (x, y) {
+      //call the initialize of the parent
+      this._super(x, y, 20, 20);
 
-			//define the classType with the name of the class
-			this.classType = "LiveNode";
+      //define the classType with the name of the class
+      this.classType = "LiveNode";
 
-			this._tmpCanvas = null;
-		},
+      this._tmpCanvas = null;
+    },
 
-		/**
-		 * Must be defined to allow the scene graph to render the image nodes
-		 * */
-		render: function (context) {
-			//save current state
-			//always call it
-			this.beforeRender(context);
+    /**
+     * Must be defined to allow the scene graph to render the image nodes
+     * */
+    render: function (context) {
+      //save current state
+      //always call it
+      this.beforeRender(context);
 
-			if (this._tmpCanvas !== null) {
-				context.globalAlpha = this.globalAlpha;
+      if (this._tmpCanvas !== null) {
+        context.globalAlpha = this.globalAlpha;
 
-				//render the pre-rendered canvas
-				context.drawImage(this._tmpCanvas, 0, 0);
-			}
+        //render the pre-rendered canvas
+        context.drawImage(this._tmpCanvas, 0, 0);
+      }
 
-			//restore state
-			//always call it
-			this.afterRender(context);
-		}
-	}
+      //restore state
+      //always call it
+      this.afterRender(context);
+    }
+  }
 );
