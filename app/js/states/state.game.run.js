@@ -158,6 +158,7 @@ var StateGameRun = CGSGObject.extend(
         for (var r = 0; r < row.length; r++) {
           var cellType = row[r];
           var width = GRID.width;
+
           var cellNode = new CellNode(r * width, c * width, width, width);
           cellNode.color = cellType ? "fuchsia" : "lightgray";
 
@@ -169,8 +170,29 @@ var StateGameRun = CGSGObject.extend(
           cellNode.buildable = buildable;
 
           this.gridNode.addChild(cellNode);
+
+          switch (cellType) {
+            case 0:
+              cellNode.addChild(new WallNode());
+              break;
+            case 42:
+              cellNode.addChild(new StartPointNode());
+              break;
+            case 43:
+              cellNode.addChild(new EndPointNode());
+              break;
+          }
         }
       }
+
+      var self = this;
+      var menuButton = new CGSGNodeButton(580, 10, "Menu");
+      menuButton.setFixedSize(new CGSGDimension(50, 20));
+      menuButton.onClick = function () {
+        self.game.changeGameState(GAME_STATE.HOME);
+      };
+
+      this.gameNode.addChild(menuButton);
     },
 
     _createGameGridOverlay: function(gameNode) {
@@ -232,18 +254,19 @@ var StateGameRun = CGSGObject.extend(
       }
     },
 
-    buildTower: function(node) {
-      node._parentNode.detachChild(node);
+    buildTower: function(towerNode) {
+      towerNode._parentNode.detachChild(towerNode);
 
-      var target = node.target;
-      node.target = null;
+      var target = towerNode.target;
+      towerNode.target = null;
 
-      target.addChild(node);
-      node.translateTo(0, 0);
+      target.addChild(towerNode);
+      towerNode.translateTo(0, 0);
+      towerNode.start();
 
-      target.tower = node;
+      target.tower = towerNode;
 
-      this.createTowerDragger = null;      
+      this.createTowerDragger = null; 
       this.map = null;
 
       this.rerouteAttackers();
@@ -254,9 +277,9 @@ var StateGameRun = CGSGObject.extend(
         this.cancelCreateTower();
       }
 
-      var dragger = this.createTowerDragger = new CGSGNodeSquare(0, 0, 30, 30);
+      var dragger = this.createTowerDragger = new TowerNode(this, 0, 0, 30, 30);
       dragger.color = "yellow";
-      dragger.globalAlpha = 0.3;
+      dragger.globalAlpha = 1.0;
 
       var self = this;
 
@@ -267,6 +290,22 @@ var StateGameRun = CGSGObject.extend(
       };
 
       this.gridNodeOverlay.addChild(dragger);
+    },
+
+    fireBullet :  function (towerPos, attackerIndex) {
+      var bullet = new CGSGNodeSquare(towerPos.x, towerPos.y, 10, 10);
+      bullet.color = "yellow";
+
+      this.gameNode.addChild(bullet);
+      var attacker = this.attackers[attackerIndex];
+
+      sceneGraph.animate(bullet, "position.x", 10, towerPos.x, attacker.position.x, "linear", 0, false);
+      sceneGraph.animate(bullet, "position.y", 10, towerPos.y, attacker.position.y, "linear", 0, false);
+
+      var gameNode = this.gameNode;
+      sceneGraph.getTimeline(bullet, "position.x").onAnimationEnd = function (event) {
+        gameNode.removeChild(bullet);
+      }
     },
 
     /**
@@ -281,8 +320,8 @@ var StateGameRun = CGSGObject.extend(
       var wButton = 130;
       var hButton = 40;
       this.buttonGoBack =
-      new ButtonNode(CGSGMath.fixedPoint((cgsgCanvas.width - wButton - 10) / 2.0),
-               CGSGMath.fixedPoint((cgsgCanvas.height - hButton) / 1.5), wButton, hButton, 10);
+        new ButtonNode(CGSGMath.fixedPoint((cgsgCanvas.width - wButton - 10) / 2.0),
+          CGSGMath.fixedPoint((cgsgCanvas.height - hButton) / 1.5), wButton, hButton, 10);
       this.loseNode.addChild(this.buttonGoBack);
 
       var textGoBack = new CGSGNodeText(28, 18, "Go Home");
@@ -328,22 +367,22 @@ var StateGameRun = CGSGObject.extend(
       this.score = 0;
 
       /*this.nbLive = maxLive;
-      this.speed = 1;
+       this.speed = 1;
 
-      this.nbBees = 0;
-      this.nbFlowers = 0;
+       this.nbBees = 0;
+       this.nbFlowers = 0;
 
-      for (var f = 0; f < this.flowers.length; f++) {
-        this.flowers[f].isVisible = false;
-      }
+       for (var f = 0; f < this.flowers.length; f++) {
+       this.flowers[f].isVisible = false;
+       }
 
-      this.rootNode.reStartAnim();
-      currentColorLerp = 0;
-      currentColorIndex = 0;
-      this.isRunning = true;
+       this.rootNode.reStartAnim();
+       currentColorLerp = 0;
+       currentColorIndex = 0;
+       this.isRunning = true;
 
-      this.updateScore();
-      this.liveNode.reinit();*/
+       this.updateScore();
+       this.liveNode.reinit();*/
     },
 
     onKeyDown: function (event) {
