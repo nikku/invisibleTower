@@ -14,8 +14,12 @@ var StateGameRun = CGSGObject.extend(
 		initialize: function (context, parent) {
 			this.context = context;
 			this.image = null;
-
 			this.game = parent;
+            this.graph = [
+                [1,1,1,1],
+                [0,1,1,0],
+                [0,0,1,1]
+            ];
 
 			this._createEnvironment();
 		},
@@ -72,18 +76,18 @@ var StateGameRun = CGSGObject.extend(
 		_createEnvironment: function () {
 			this.rootNode = new SkyNode(0, 0, cgsgCanvas.width, cgsgCanvas.height, this.context);
 
-			var floor = new FloorNode(0, 0, 1, 1);
-			this.rootNode.addChild(floor);
+			//var floor = new FloorNode(0, 0, 1, 1);
+			//this.rootNode.addChild(floor);
 
-			this.scoreNode = new ScorePanelNode(0, 0, 103, 18);
-			this.rootNode.addChild(this.scoreNode);
+			//this.scoreNode = new ScorePanelNode(0, 0, 103, 18);
+			//this.rootNode.addChild(this.scoreNode);
 
-			this.liveNode = new LivePanelNode(cgsgCanvas.width - 135, 0, 135, 18);
-			this.rootNode.addChild(this.liveNode);
+			//this.liveNode = new LivePanelNode(cgsgCanvas.width - 135, 0, 135, 18);
+			//this.rootNode.addChild(this.liveNode);
 
 			this._createGameEnvironment();
 
-			this._createLoseEnvironment();
+			//this._createLoseEnvironment();
 		},
 
 		/**
@@ -94,44 +98,20 @@ var StateGameRun = CGSGObject.extend(
 			this.gameNode = new CGSGNode(0, 0, 1, 1);
 			this.rootNode.addChild(this.gameNode);
 
-			this.maxClouds = 5;
-			this.clouds = [];
-			for (var c = 0; c < this.maxClouds; c++) {
-				var cloud = new CloudNode(0, 0, 200, 200);
-				this.clouds.push(cloud);
-				this.gameNode.addChild(cloud);
-			}
+            for (var index = 0; index < this.graph.length; index++) {
+                var row = this.graph[index];
+                for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
+                    var cellType = row[rowIndex];
+                    var width = 30;
+                    var cellNode = new CGSGNodeSquare(rowIndex*width, index*width, width,width);
+                    cellNode.globalAlpha = 0.8;
+                    cellNode.color = cellType == 0 ? "lightgray" :  "fuchsia";
+                    cellNode.lineWidth = 2;
+                    cellNode.lineColor = "gray";
+                    this.gameNode.addChild(cellNode);
+                }
+            }
 
-			this.bees = [];
-			this.maxBees = 10;
-			var bindKillBee = this.killBee.bind(this);
-			//init bees
-			for (var b = 0; b < this.maxBees; b++) {
-				var bee = new BeeNode(-30, Math.random() * 200, this.context, this, b);
-				bee.onClick = bindKillBee;
-				this.bees.push(bee);
-				this.gameNode.addChild(bee);
-			}
-
-			this.flowers = [];
-			this.maxFlowers = 20;
-			var type = 0;
-			var bindCatchFlower = this.catchFlower.bind(this);
-			for (var f = 0; f < this.maxFlowers; f++) {
-				type = 0;
-				if (f > 10) {
-					type = Math.round(Math.random() * 2);
-				}
-				else if (f > 5) {
-					type = Math.round(Math.random());
-				}
-
-				var flower = new FlowerNode(this, type, true);
-				flower.onClick = bindCatchFlower;
-				flower.isVisible = false;
-				this.flowers.push(flower);
-				this.gameNode.addChild(flower);
-			}
 		},
 
 		/**
@@ -185,7 +165,7 @@ var StateGameRun = CGSGObject.extend(
 			this.rootNode.detachChild(this.loseNode);
 			this.rootNode.addChild(this.gameNode);
 			this.score = 0;
-			this.nbLive = maxLive;
+			/*this.nbLive = maxLive;
 			this.speed = 1;
 
 			this.nbBees = 0;
@@ -201,7 +181,7 @@ var StateGameRun = CGSGObject.extend(
 			this.isRunning = true;
 
 			this.updateScore();
-			this.liveNode.reinit();
+			this.liveNode.reinit();*/
 		},
 
 		onKeyDown: function (event) {
@@ -268,7 +248,7 @@ var StateGameRun = CGSGObject.extend(
 		 * update the score panel
 		 */
 		updateScore: function () {
-			this.scoreNode.setScore(this.score);
+			//this.scoreNode.setScore(this.score);
 		},
 
 		/**

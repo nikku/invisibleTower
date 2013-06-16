@@ -62,9 +62,9 @@ var StateHome = CGSGObject.extend(
 				this.clouds[c].start();
 			}
 
-			var floor = new FloorNode(0, 0, 1, 1);
-			this.rootNode.addChild(floor);
-			floor.isClickable = false;
+			//var floor = new FloorNode(0, 0, 1, 1);
+			//this.rootNode.addChild(floor);
+			//floor.isClickable = false;
 
 			//button "Go"
 			var wButton = 250;
