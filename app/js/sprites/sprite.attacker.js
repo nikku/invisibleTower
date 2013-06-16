@@ -8,16 +8,22 @@
  */
 var AttackerNode = CGSGNodeSprite.extend(
   {
-    initialize: function (x, y, map, context, parentState, id) {
-      this._super(x*cellWidth, y*cellWidth, null, context);
+    initialize: function (x, y, context, parentState, id) {
+      this._super(x, y, null, context);
 
       this.parentState = parentState;
       this.id = id;
 
       //name, speed, frames, sliceX, sliceY, width, height, framesPerLine
       this.addAnimation("fly", 4, 3, 0, 0, 16, 16, 1);
+    },
 
-      this.currentPath = astar.search(map.graph.nodes, map.graph.nodes[x][y], map.targetPos, false);
+    route: function(graph, to) {
+
+      var x = Math.round(this.position.x / GRID.width),
+          y = Math.round(this.position.y / GRID.width);
+
+      this.currentPath = astar.search(graph, graph[y][x], graph[to.y][to.x], false);
     },
 
     start: function () {
@@ -30,10 +36,6 @@ var AttackerNode = CGSGNodeSprite.extend(
     },
 
     initPosAndSpeed: function () {
-      this.currentPos = 0;
-      var x = 0;
-      var y = 0;
-      this.translateTo(x, y);
       this.speed = CGSGMath.fixedPoint(20);
     },
 

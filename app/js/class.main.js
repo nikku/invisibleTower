@@ -42,9 +42,11 @@ var GAME_STATE = {
 
 var CGMain = CGSGScene.extend(
   {
-    initialize: function (canvas) {
+    initialize: function (canvas, level) {
 
       this._super(canvas);
+
+      this.levelCode = level;
 
       this.gameState = GAME_STATE.LOADING;
 
@@ -86,6 +88,55 @@ var CGMain = CGSGScene.extend(
       var that = this;
       this.spriteSheet.onload = that.onItemsImageLoaded();
       this.spriteSheet.src = "js/img/bee.png";
+    },
+
+    loadLevel: function(level) {
+      var levelData = LEVELS[level];
+      if (!levelData) {
+        throw new Error("Level " + level + " does not exist");
+      }
+
+      // start position
+      var start;
+
+      // end position
+      var end;
+
+      var r = 0, c = 0;
+
+      var fields = [];
+      var row = null;
+
+      for (var i = 0, field; !!(field = levelData.charAt(i)); i++) {
+        if (!fields[r]) {
+          fields[r] = row = [];
+        }
+
+        switch (field) {
+          case 'S':
+            row.push(1);
+            start = { y: r, x: c };
+            break;
+          case 'E':
+            row.push(1);
+            end = { y: r, x: c };
+            break;
+          case ' ':
+            row.push(1);
+            break;
+          case 'x':
+            row.push(0);
+            break;
+          case '#':
+            r++;
+            c = 0;
+            continue;
+        }
+
+        c++;
+      }
+
+      return { id: level, start: start, end: end, fields: fields };
     },
 
     /**

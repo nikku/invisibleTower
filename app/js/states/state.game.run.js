@@ -20,28 +20,30 @@ var StateGameRun = CGSGObject.extend(
       this.context = context;
       this.image = null;
       this.game = parent;
-      this.bees = [];
+      this.attackers = [];
 
-      // 0 = wall, 1 = open
-      var field = this.map = [
-        [42,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0],
-         [1,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0],
-         [0,0,1,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0],
-         [0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,43],
-         [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
-         [0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0],
-         [0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0],
-         [0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0]
-      ];
-
-      var graph = this.graph = new Graph(field);
-      var start = this.start = graph.nodes[0][0];
-      var end = this.end = graph.nodes[3][18];
-
-      var map = this.map = {field : field, "graph" :  this.graph, sourcePos : start, targetPos : end};
+      var level = this.level = parent.loadLevel(parent.levelCode);
+      var weights = this.weights = this.createWeights(level);
 
       this._createEnvironment();
+    },
+
+    createWeights: function(level) {
+      var fields = level.fields;
+      var weights = [];
+
+      for (var i = 0; i < fields.length; i++) {
+        var fieldRow = fields[i];
+        var weightsRow = [];
+
+        weights.push(weightsRow);
+
+        for (var j = 0; j < fieldRow.length; j++) {
+          weightsRow.push(fieldRow[j] ? 1 : 5000);
+        }
+      }
+
+      return weights;
     },
 
     /**
@@ -50,12 +52,18 @@ var StateGameRun = CGSGObject.extend(
     run: function () {
       this.initGame();
 
-      for (var b = 0; b < this.bees.length; b++) {
-        this.bees[b].setImage(this.image);
-      }
-
-      this.bees[0].start();
       this.updateScore(this.score);
+      this.addAttacker("bee");
+    },
+
+    rerouteAttackers: function() {
+      var map = this.getMap(),
+          graph = map.graph,
+          end = map.end;
+
+      for (var i = 0, attacker; !!(attacker = this.attackers[i]); i++) {
+        attacker.route(graph.nodes, end);
+      }
     },
 
     /**
@@ -94,6 +102,35 @@ var StateGameRun = CGSGObject.extend(
       //this._createLoseEnvironment();
     },
 
+    updateWeight: function(x, y, weight) {
+      this.weights[y][x] = weight;
+      this.map = null;
+    },
+
+    getMap: function() {
+      if (!this.map) {
+        this.map = { weights: this.weights, start: this.level.start, end: this.level.end, graph: new Graph(this.weights) };
+      }
+
+      return this.map;
+    },
+
+    addAttacker: function(config) {
+
+      var map = this.getMap(),
+          start = map.start,
+          end = map.end,
+          graph = map.graph;
+
+      var attacker = new AttackerNode(start.x * GRID.width, start.y * GRID.width, this.context, this, 1);
+      attacker.setImage(this.image);
+      attacker.route(graph.nodes, end);
+      attacker.start();
+
+      this.attackers.push(attacker);
+      this.gridNodeOverlay.addChild(attacker);
+    },
+
     /**
      * create gfx elements and node for the game board
      * @private
@@ -103,12 +140,8 @@ var StateGameRun = CGSGObject.extend(
       this.rootNode.addChild(this.gameNode);
 
       this._createGameGrid(this.gameNode);
+      this._createGameGridOverlay(this.gameNode);
       this._createHud(this.gameNode);
-
-      var bee = new AttackerNode(0, 0, this.map, this.context, this, 1);
-      this.bees.push(bee);
-
-      this.gameNode.addChild(bee);
     },
 
     _createGameGrid: function(gameNode) {
@@ -116,16 +149,33 @@ var StateGameRun = CGSGObject.extend(
       this.gridNode = new CGSGNode(0, 0, GRID.x * GRID.width, GRID.y * GRID.width);
       gameNode.addChild(this.gridNode);
 
-      for (var index = 0; index < this.map.field.length; index++) {
-        var row = this.map.field[index];
-        for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
-          var cellType = row[rowIndex];
+      var fields = this.level.fields,
+          start = this.level.start,
+          end = this.level.end;
+
+      for (var c = 0; c < fields.length; c++) {
+        var row = fields[c];
+        for (var r = 0; r < row.length; r++) {
+          var cellType = row[r];
           var width = GRID.width;
-          var cellNode = new CellNode(rowIndex * width, index * width, width, width);
-          cellNode.color = cellType == 0 ? "lightgray" : "fuchsia";
+          var cellNode = new CellNode(r * width, c * width, width, width);
+          cellNode.color = cellType ? "fuchsia" : "lightgray";
+
+          var buildable = (r != start.x || c != start.y) && (r != end.x || c != end.y);
+
+          // for administrative reasons ;-)
+          cellNode.cellType = cellType;
+          cellNode.gridPosition = { x: r, y: c };
+          cellNode.buildable = buildable;
+
           this.gridNode.addChild(cellNode);
         }
       }
+    },
+
+    _createGameGridOverlay: function(gameNode) {
+      this.gridNodeOverlay = new CGSGNode(0, 0, GRID.x * GRID.width, GRID.y * GRID.width);
+      gameNode.addChild(this.gridNodeOverlay);
     },
 
     _createHud: function(gameNode) {
@@ -172,7 +222,7 @@ var StateGameRun = CGSGObject.extend(
 
       if (target) {
         dragger.translateTo(target.position.x, target.position.y);
-        if (target.tower) {
+        if (target.tower || !target.buildable) {
           dragger.color = "red";
           dragger.target = null;
         } else {
@@ -192,7 +242,11 @@ var StateGameRun = CGSGObject.extend(
       node.translateTo(0, 0);
 
       target.tower = node;
-      this.createTowerDragger = null;
+
+      this.createTowerDragger = null;      
+      this.map = null;
+
+      this.rerouteAttackers();
     },
 
     createDragTower: function(towerType) {
@@ -212,7 +266,7 @@ var StateGameRun = CGSGObject.extend(
         }
       };
 
-      this.gridNode.addChild(dragger);
+      this.gridNodeOverlay.addChild(dragger);
     },
 
     /**
