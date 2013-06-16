@@ -95,7 +95,7 @@ var CGMain = CGSGScene.extend(
 			GAME_STATE.ABOUT.instance.setImage(this.spriteSheet);
 			GAME_STATE.PLAY_RUN.instance.setImage(this.spriteSheet);
 
-			this.changeGameState(GAME_STATE.HOME);
+			this.changeGameState(GAME_STATE.PLAY_RUN);
 		},
 
 		/**

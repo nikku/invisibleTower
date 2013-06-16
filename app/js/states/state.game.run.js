@@ -15,11 +15,28 @@ var StateGameRun = CGSGObject.extend(
 			this.context = context;
 			this.image = null;
 			this.game = parent;
-            this.graph = [
-                [1,1,1,1],
-                [0,1,1,0],
-                [0,0,1,1]
+
+            this.columns = 19;
+            this.rows = 9;
+
+            // 0 = wall, 1 = open
+            var map = this.map = [
+               [42,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0],
+                [0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0],
+                [0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0],
+                [0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,43],
+                [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+                [0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0],
+                [0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0],
+                [0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0]
             ];
+
+            var graph = this.graph = new Graph(map);
+            var start = graph.nodes[0][0];
+            var end = graph.nodes[3][18];
+            var result = astar.search(graph.nodes, start, end, true);
+            console.log(result);
 
 			this._createEnvironment();
 		},
@@ -98,8 +115,8 @@ var StateGameRun = CGSGObject.extend(
 			this.gameNode = new CGSGNode(0, 0, 1, 1);
 			this.rootNode.addChild(this.gameNode);
 
-            for (var index = 0; index < this.graph.length; index++) {
-                var row = this.graph[index];
+            for (var index = 0; index < this.map.length; index++) {
+                var row = this.map[index];
                 for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
                     var cellType = row[rowIndex];
                     var width = 30;
