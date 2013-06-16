@@ -8,11 +8,17 @@
  */
 var TowerNode = CGSGNodeSquare.extend(
   {
-    initialize: function (state, x, y, width, height) {
+    initialize: function (state, x, y, width, height, params) {
       this._super(x,y,width, height);
-      this.reloadSpeed = 40;
       this.state = state;
-      this.radius = 80.0;
+
+      this.reloadSpeed = params.reloadSpeed;
+      this.radius = params.radius;
+      this.speed = params.speed;
+      this.projectiles = params.projectiles;
+      this.damage = params.damage;
+
+      this.realColor = params.color;
     },
 
     start: function () {
@@ -26,12 +32,14 @@ var TowerNode = CGSGNodeSquare.extend(
     },
 
     onReloaded: function () {
+
+      var count = 0;
+
       for (var attackerIndex = 0; attackerIndex < this.state.attackers.length; attackerIndex++) {
         var attacker = this.state.attackers[attackerIndex];
         var towerPos = this.getAbsolutePosition();
         var attackerPos = attacker.getAbsolutePosition();
-
-          function lineDistance( point1, point2 )
+       function lineDistance( point1, point2 )
           {
               var xs = 0;
               var ys = 0;
@@ -47,8 +55,13 @@ var TowerNode = CGSGNodeSquare.extend(
 
         var distance = Math.abs(lineDistance(towerPos, attackerPos));
 
-        if (+distance <= this.radius) {
-          this.state.fireBullet(towerPos, attackerIndex, 34);
+        if (distance <= this.radius) {
+          this.state.fireBullet(towerPos, attackerIndex, this.damage, this.speed);
+
+          count++;
+        }
+
+        if (count == this.projectiles) {
           break;
         }
       }

@@ -12,8 +12,6 @@
 var VIEWPORT = { width: 640, height: 320 };
 var GRID = { x: 19, y: 9, width: 30 };
 
-var TOWER_TYPES = [ 'BOW', 'BOMB' ];
-
 var StateGameRun = CGSGObject.extend(
   {
     initialize: function (context, parent) {
@@ -56,7 +54,7 @@ var StateGameRun = CGSGObject.extend(
 
       setInterval(function () {
         self.addAttacker("bee");
-      }, 1500);
+      }, 750);
 
       this.updateScore(this.score);
     },
@@ -217,23 +215,29 @@ var StateGameRun = CGSGObject.extend(
       // total display size: 640 * 320
       // grid size: 19 * 9
 
-      this.hudNode = new CGSGNode(0, GRID.y * GRID.width, VIEWPORT.width, VIEWPORT.height - GRID.y * GRID.width);
+      var hudNode = this.hudNode = new CGSGNode(0, GRID.y * GRID.width, VIEWPORT.width, VIEWPORT.height - GRID.y * GRID.width);
 
       gameNode.addChild(this.hudNode);
 
-      for (var i = 0; i < TOWER_TYPES.length; i++) {
-        var width = GRID.width;
-        var node = new CGSGNodeSquare(5 + i*width, 5, width, width);
-        var towerType = TOWER_TYPES[i];
+      var i = 0;
 
-        node.globalAlpha = 0.8;
-        node.color = "lightgray";
+      for (var key in TOWER_TYPES) {
+        (function(towerType) {
 
-        node.onClick = function(e) {
-          self.selectCreateTower(e, towerType);
-        };
+          var width = GRID.width;
+          var node = new CGSGNodeSquare(5 + 5 * i + i * width, 5, width, width);
 
-        this.hudNode.addChild(node);
+          node.globalAlpha = 0.8;
+          node.color = towerType.color;
+
+          node.onClick = function(e) {
+            self.selectCreateTower(e, towerType);
+          };
+
+          hudNode.addChild(node);
+        })(TOWER_TYPES[key]);
+
+        i++;
       }
     },
 
@@ -272,6 +276,7 @@ var StateGameRun = CGSGObject.extend(
 
       target.addChild(towerNode);
       towerNode.translateTo(0, 0);
+      towerNode.color = towerNode.realColor;
       towerNode.start();
 
       target.tower = towerNode;
@@ -288,7 +293,9 @@ var StateGameRun = CGSGObject.extend(
         this.cancelCreateTower();
       }
 
-      var dragger = this.createTowerDragger = new TowerNode(this, 0, 0, 30, 30);
+      console.log("Create tower: ", towerType);
+
+      var dragger = this.createTowerDragger = new TowerNode(this, 0, 0, 30, 30, towerType);
       dragger.color = "yellow";
       dragger.globalAlpha = 1.0;
 
@@ -303,14 +310,14 @@ var StateGameRun = CGSGObject.extend(
       this.gridNodeOverlay.addChild(dragger);
     },
 
-    fireBullet :  function (towerPos, attackerIndex, attackValue) {
+    fireBullet :  function (towerPos, attackerIndex, attackValue, attackSpeed) {
       var attacker = this.attackers[attackerIndex];
 
       if (attacker.isDead) {
         return;
       }
 
-      var bullet = new CGSGNodeSquare(towerPos.x, towerPos.y, 10, 10);
+      var bullet = new CGSGNodeSquare(towerPos.x, towerPos.y, 5, 5);
       bullet.color = "yellow";
       this.gameNode.addChild(bullet);
       attacker.hurt(attackValue);
