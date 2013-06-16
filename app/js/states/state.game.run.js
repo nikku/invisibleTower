@@ -21,6 +21,7 @@ var StateGameRun = CGSGObject.extend(
       this.image = null;
       this.game = parent;
       this.attackers = [];
+      this.score = 0;
 
       var level = this.level = parent.loadLevel(parent.levelCode);
       var weights = this.weights = this.createWeights(level);
@@ -51,9 +52,13 @@ var StateGameRun = CGSGObject.extend(
      */
     run: function () {
       this.initGame();
+      var self = this;
+
+      setInterval(function () {
+        self.addAttacker("bee");
+      }, 750);
 
       this.updateScore(this.score);
-      this.addAttacker("bee");
     },
 
     rerouteAttackers: function() {
@@ -91,13 +96,13 @@ var StateGameRun = CGSGObject.extend(
       //var floor = new FloorNode(0, 0, 1, 1);
       //this.rootNode.addChild(floor);
 
-      //this.scoreNode = new ScorePanelNode(0, 0, 103, 18);
-      //this.rootNode.addChild(this.scoreNode);
-
       //this.liveNode = new LivePanelNode(cgsgCanvas.width - 135, 0, 135, 18);
       //this.rootNode.addChild(this.liveNode);
 
       this._createGameEnvironment();
+
+      this.scoreNode = new ScorePanelNode(570, 40, 103, 18);
+      this.rootNode.addChild(this.scoreNode);
 
       //this._createLoseEnvironment();
     },
@@ -124,9 +129,9 @@ var StateGameRun = CGSGObject.extend(
 
       var attacker = new AttackerNode(start.x * GRID.width, start.y * GRID.width, this.context, this, 1);
       attacker.setImage(this.image);
-      attacker.route(graph.nodes, end);
       attacker.start();
-
+      attacker.route(graph.nodes, end);
+      
       this.attackers.push(attacker);
       this.gridNodeOverlay.addChild(attacker);
     },
@@ -160,9 +165,12 @@ var StateGameRun = CGSGObject.extend(
           var width = GRID.width;
 
           var cellNode = new CellNode(r * width, c * width, width, width);
-          cellNode.color = cellType ? "fuchsia" : "lightgray";
+          cellNode.color = "lightgray";
 
-          var buildable = (r != start.x || c != start.y) && (r != end.x || c != end.y);
+          var isStart = (r == start.x && c == start.y);
+          var isEnd = (r == end.x && c == end.y);
+
+          var buildable = !isStart && !isEnd;
 
           // for administrative reasons ;-)
           cellNode.cellType = cellType;
@@ -171,16 +179,17 @@ var StateGameRun = CGSGObject.extend(
 
           this.gridNode.addChild(cellNode);
 
-          switch (cellType) {
-            case 0:
-              cellNode.addChild(new WallNode());
-              break;
-            case 42:
-              cellNode.addChild(new StartPointNode());
-              break;
-            case 43:
-              cellNode.addChild(new EndPointNode());
-              break;
+          if (isStart) {
+            cellNode.addChild(new StartPointNode());
+          } else
+          if (isEnd) {
+            cellNode.addChild(new EndPointNode());
+          } else {
+            switch (cellType) {
+              case 0:
+                cellNode.addChild(new WallNode());
+                break;
+            }
           }
         }
       }
@@ -267,6 +276,7 @@ var StateGameRun = CGSGObject.extend(
       target.tower = towerNode;
 
       this.createTowerDragger = null; 
+      this.weights[target.gridPosition.y][target.gridPosition.x] = 50;
       this.map = null;
 
       this.rerouteAttackers();
@@ -292,12 +302,17 @@ var StateGameRun = CGSGObject.extend(
       this.gridNodeOverlay.addChild(dragger);
     },
 
-    fireBullet :  function (towerPos, attackerIndex) {
+    fireBullet :  function (towerPos, attackerIndex, attackValue) {
+      var attacker = this.attackers[attackerIndex];
+
+      if (attacker.isDead) {
+        return;
+      }
+
       var bullet = new CGSGNodeSquare(towerPos.x, towerPos.y, 10, 10);
       bullet.color = "yellow";
-
       this.gameNode.addChild(bullet);
-      var attacker = this.attackers[attackerIndex];
+      attacker.hurt(attackValue);
 
       sceneGraph.animate(bullet, "position.x", 10, towerPos.x, attacker.position.x, "linear", 0, false);
       sceneGraph.animate(bullet, "position.y", 10, towerPos.y, attacker.position.y, "linear", 0, false);
@@ -335,17 +350,6 @@ var StateGameRun = CGSGObject.extend(
       textGoLose.color = "white";
       textGoLose.setSize(32);
       this.loseNode.addChild(textGoLose);
-    },
-
-    /**
-     * Change replace the game root node with the lose root node
-     */
-    renderLose: function () {
-      if (this.isRunning) {
-        this.isRunning = false;
-        this.rootNode.detachChild(this.gameNode);
-        this.rootNode.addChild(this.loseNode);
-      }
     },
 
     onButtonGoBackClick: function () {
@@ -418,62 +422,14 @@ var StateGameRun = CGSGObject.extend(
     },
 
     /**
-     * called when the player hit a bee
-     * @param event
-     */
-    killBee: function (event) {
-      event.node.reStartAnim();
-      this.nbLive = Math.max(0, this.nbLive - 1);
-      this.updateLive();
-    },
-
-    /**
-     * called when a flower hit the ground
-     */
-    killFlower: function () {
-      this.nbLive = Math.max(0, this.nbLive - 1);
-      this.updateLive();
-    },
-
-    /**
-     * called when the player catch a flower
-     * @param event
-     */
-    catchFlower: function (event) {
-      this.score += event.node.points;
-      this.nbLive = Math.min(this.nbLive + event.node.live, maxLive);
-
-      sceneGraph.animate(event.node, "globalAlpha", 10, 1.0, 0.0, "linear", 0, true);
-      sceneGraph.getTimeline(event.node, "globalAlpha").onAnimationEnd = function (event) {
-        event.node.reStartAnim(1);
-      }
-
-      this.updateScore();
-      this.updateLive();
-    },
-
-    /**
      * update the score panel
      */
-    updateScore: function () {
-      //this.scoreNode.setScore(this.score);
-    },
-
-    /**
-     * Update the lives panel
-     */
-    updateLive: function () {
-      while (this.nbLive <= maxLive && this.nbLive > this.liveNode.nbLive) {
-        this.liveNode.addLive();
+    updateScore: function (newPoints) {
+      if (newPoints) {
+          this.score += newPoints;
       }
-
-      while (this.nbLive >= 0 && this.nbLive < this.liveNode.nbLive) {
-        this.liveNode.removeLive();
-      }
-
-      if (this.nbLive <= 0) {
-        this.renderLose();
-      }
+      this.scoreNode.setScore(this.score);
     }
+
   }
 );

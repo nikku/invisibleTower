@@ -18,7 +18,7 @@ var ScorePanelNode = CGSGNodeSquare.extend(
       this.textNode = new CGSGNodeText(5, 14, "");
       this.addChild(this.textNode);
       this.textNode.color = "#4d9861";
-      this.textNode.setSize(11, false);
+      this.textNode.setSize(10, false);
       this.textNode.setTextBaseline("alphabetic");
     },
 
