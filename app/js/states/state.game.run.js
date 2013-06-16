@@ -111,23 +111,22 @@ var StateGameRun = CGSGObject.extend(
      * @private
      */
     _createGameEnvironment: function () {
-      this.gameNode = new CGSGNode(0, 0, 1, 1);
-      this.rootNode.addChild(this.gameNode);
+        this.gameNode = new CGSGNode(0, 0, 1, 1);
+        this.rootNode.addChild(this.gameNode);
 
-            for (var index = 0; index < this.graph.length; index++) {
-                var row = this.graph[index];
-                for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
-                    var cellType = row[rowIndex];
-                    var width = 30;
-                    var cellNode = new CGSGNodeSquare(rowIndex*width, index*width, width,width);
-                    cellNode.globalAlpha = 0.8;
-                    cellNode.color = cellType == 0 ? "lightgray" :  "fuchsia";
-                    cellNode.lineWidth = 2;
-                    cellNode.lineColor = "gray";
-                    this.gameNode.addChild(cellNode);
-                }
+        for (var index = 0; index < this.map.length; index++) {
+            var row = this.map[index];
+            for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
+                var cellType = row[rowIndex];
+                var width = 30;
+                var cellNode = new CGSGNodeSquare(rowIndex * width, index * width, width, width);
+                cellNode.globalAlpha = 0.8;
+                cellNode.color = cellType == 0 ? "lightgray" : "fuchsia";
+                cellNode.lineWidth = 2;
+                cellNode.lineColor = "gray";
+                this.gameNode.addChild(cellNode);
             }
-
+        }
     },
 
     /**
