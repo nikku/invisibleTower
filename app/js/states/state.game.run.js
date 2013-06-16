@@ -56,7 +56,7 @@ var StateGameRun = CGSGObject.extend(
 
       setInterval(function () {
         self.addAttacker("bee");
-      }, 750);
+      }, 1500);
 
       this.updateScore(this.score);
     },
@@ -91,9 +91,10 @@ var StateGameRun = CGSGObject.extend(
      * @private
      */
     _createEnvironment: function () {
-      this.rootNode = new SkyNode(0, 0, cgsgCanvas.width, cgsgCanvas.height, this.context);
+      this.rootNode = new CGSGNode(0, 0, 1, 1);
 
-      //var floor = new FloorNode(0, 0, 1, 1);
+
+        //var floor = new FloorNode(0, 0, 1, 1);
       //this.rootNode.addChild(floor);
 
       //this.liveNode = new LivePanelNode(cgsgCanvas.width - 135, 0, 135, 18);
@@ -127,7 +128,7 @@ var StateGameRun = CGSGObject.extend(
           end = map.end,
           graph = map.graph;
 
-      var attacker = new AttackerNode(start.x * GRID.width, start.y * GRID.width, this.context, this, 1);
+      var attacker = new AttackerNode(start.x * GRID.width, start.y * GRID.width, this.context, this, 1, 100, 1);
       attacker.setImage(this.image);
       attacker.start();
       attacker.route(graph.nodes, end);

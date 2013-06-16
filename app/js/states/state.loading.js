@@ -16,10 +16,7 @@ var StateLoading = CGSGObject.extend(
     },
 
     _createEnvironment: function () {
-      this.rootNode = new SkyNode(0, 0, cgsgCanvas.width, cgsgCanvas.height, this.context);
-
-      var floor = new FloorNode(0, 0, 1, 1);
-      this.rootNode.addChild(floor);
+      this.rootNode = new CGSGNode(0, 0, 1, 1);
 
       this.text = new CGSGNodeText(0, 0, "LOADING...");
       this.text.color = "#3322DE";

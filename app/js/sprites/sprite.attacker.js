@@ -43,7 +43,7 @@ var AttackerNode = CGSGNodeSprite.extend(
     },
 
     initPosAndSpeed: function () {
-      this.speed = CGSGMath.fixedPoint(20);
+      this.speed = CGSGMath.fixedPoint(50);
     },
 
     startAnim: function () {
@@ -57,8 +57,6 @@ var AttackerNode = CGSGNodeSprite.extend(
         var delay = pathIndex == 0 ? 0 : this.speed * pathIndex;
         var toX =  pathNode.y*cellWidth;
         var toY =  pathNode.x*cellWidth;
-
-        console.log(this.speed, oldX, oldY, toX, toY, delay);
 
         sceneGraph.animate(this, "position.x", this.speed, oldX, toX, "linear", delay, false);
         sceneGraph.animate(this, "position.y", this.speed, oldY, toY, "linear", delay, false);
