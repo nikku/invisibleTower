@@ -34,7 +34,7 @@ var AttackerNode = CGSGNodeSprite.extend(
       var x = 0;
       var y = 0;
       this.translateTo(x, y);
-      this.speed = CGSGMath.fixedPoint(20);
+      this.speed = CGSGMath.fixedPoint(50);
     },
 
     startAnim: function () {

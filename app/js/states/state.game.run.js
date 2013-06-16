@@ -20,7 +20,7 @@ var StateGameRun = CGSGObject.extend(
       this.context = context;
       this.image = null;
       this.game = parent;
-      this.bees = [];
+      this.attackers = [];
 
       // 0 = wall, 1 = open
       var field = this.map = [
@@ -40,7 +40,6 @@ var StateGameRun = CGSGObject.extend(
       var end = this.end = graph.nodes[3][18];
 
       var map = this.map = {field : field, "graph" :  this.graph, sourcePos : start, targetPos : end};
-
       this._createEnvironment();
     },
 
@@ -50,11 +49,11 @@ var StateGameRun = CGSGObject.extend(
     run: function () {
       this.initGame();
 
-      for (var b = 0; b < this.bees.length; b++) {
-        this.bees[b].setImage(this.image);
+      for (var b = 0; b < this.attackers.length; b++) {
+        this.attackers[b].setImage(this.image);
       }
 
-      this.bees[0].start();
+      this.attackers[0].start();
       this.updateScore(this.score);
     },
 
@@ -106,7 +105,7 @@ var StateGameRun = CGSGObject.extend(
       this._createHud(this.gameNode);
 
       var bee = new AttackerNode(0, 0, this.map, this.context, this, 1);
-      this.bees.push(bee);
+      this.attackers.push(bee);
 
       this.gameNode.addChild(bee);
     },
@@ -182,16 +181,17 @@ var StateGameRun = CGSGObject.extend(
       }
     },
 
-    buildTower: function(node) {
-      node._parentNode.detachChild(node);
+    buildTower: function(towerNode) {
+      towerNode._parentNode.detachChild(towerNode);
 
-      var target = node.target;
-      node.target = null;
+      var target = towerNode.target;
+      towerNode.target = null;
 
-      target.addChild(node);
-      node.translateTo(0, 0);
+      target.addChild(towerNode);
+      towerNode.translateTo(0, 0);
+      towerNode.start();
 
-      target.tower = node;
+      target.tower = towerNode;
       this.createTowerDragger = null;
     },
 
@@ -200,9 +200,9 @@ var StateGameRun = CGSGObject.extend(
         this.cancelCreateTower();
       }
 
-      var dragger = this.createTowerDragger = new CGSGNodeSquare(0, 0, 30, 30);
+      var dragger = this.createTowerDragger = new TowerNode(this, 0, 0, 30, 30);
       dragger.color = "yellow";
-      dragger.globalAlpha = 0.3;
+      dragger.globalAlpha = 1.0;
 
       var self = this;
 
@@ -213,6 +213,22 @@ var StateGameRun = CGSGObject.extend(
       };
 
       this.gridNode.addChild(dragger);
+    },
+
+    fireBullet :  function (towerPos, attackerIndex) {
+      var bullet = new CGSGNodeSquare(towerPos.x, towerPos.y, 10, 10);
+      bullet.color = "yellow";
+
+      this.gameNode.addChild(bullet);
+      var attacker = this.attackers[attackerIndex];
+
+      sceneGraph.animate(bullet, "position.x", 10, towerPos.x, attacker.position.x, "linear", 0, false);
+      sceneGraph.animate(bullet, "position.y", 10, towerPos.y, attacker.position.y, "linear", 0, false);
+
+      var gameNode = this.gameNode;
+      sceneGraph.getTimeline(bullet, "position.x").onAnimationEnd = function (event) {
+        gameNode.removeChild(bullet);
+      }
     },
 
     /**
