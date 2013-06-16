@@ -122,7 +122,7 @@ var StateGameRun = CGSGObject.extend(
           var cellType = row[rowIndex];
           var width = GRID.width;
           var cellNode = new CellNode(rowIndex * width, index * width, width, width);
-          cellNode.color = cellType == 0 ? "lightgray" : "fuchsia";
+          cellNode.color = "lightgray";
           this.gridNode.addChild(cellNode);
 
           switch (cellType) {

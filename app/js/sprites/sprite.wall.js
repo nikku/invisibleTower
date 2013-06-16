@@ -13,28 +13,8 @@ var WallNode = CGSGNodeSquare.extend(
       this.classType = "WallNode";
       this.globalAlpha = 1;
       this.color = "black";
-
-      for (var i = 0; i < 6; i++) {
-        for (var j = 0; j < 6; j++) {
-          var brick = new CGSGNodeSquare(i * 5, j * 5, 5, 5);
-
-          if (i % 2 == 0) {
-            if (j % 2 == 0) {
-              brick.color = "black";
-            } else {
-              brick.color = "#4c4c4c";
-            }
-          } else {
-            if (j % 2 == 0) {
-              brick.color = "#4c4c4c";
-            } else {
-              brick.color = "black";
-            }
-          }
-
-          this.addChild(brick);
-        }
-      }
+      this.lineWidth = 4;
+      this.lineColor = "#4c4c4c";
     }
   }
 );
