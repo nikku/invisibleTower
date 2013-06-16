@@ -58,8 +58,6 @@ var AttackerNode = CGSGNodeSprite.extend(
         var toX =  pathNode.y*cellWidth;
         var toY =  pathNode.x*cellWidth;
 
-        console.log(this.speed, oldX, oldY, toX, toY, delay);
-
         sceneGraph.animate(this, "position.x", this.speed, oldX, toX, "linear", delay, false);
         sceneGraph.animate(this, "position.y", this.speed, oldY, toY, "linear", delay, false);
 
