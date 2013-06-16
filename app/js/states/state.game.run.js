@@ -25,14 +25,14 @@ var StateGameRun = CGSGObject.extend(
       // 0 = wall, 1 = open
       var field = this.map = [
         [42,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0],
-         [1,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0],
-         [0,0,1,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0],
-         [0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,43],
-         [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
-         [0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0],
-         [0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0],
-         [0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0]
+        [1,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0],
+        [0,0,1,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0],
+        [0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,43],
+        [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
+        [0,0,0,0,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0],
+        [0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0],
+        [0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0]
       ];
 
       var graph = this.graph = new Graph(field);
@@ -121,10 +121,31 @@ var StateGameRun = CGSGObject.extend(
           var cellType = row[rowIndex];
           var width = GRID.width;
           var cellNode = new CellNode(rowIndex * width, index * width, width, width);
-          cellNode.color = cellType == 0 ? "lightgray" : "fuchsia";
+          cellNode.color = "lightgray";
           this.gridNode.addChild(cellNode);
+
+          switch (cellType) {
+            case 0:
+              cellNode.addChild(new WallNode());
+              break;
+            case 42:
+              cellNode.addChild(new StartPointNode());
+              break;
+            case 43:
+              cellNode.addChild(new TowerNode());
+              break;
+          }
         }
       }
+
+      var self = this;
+      var menuButton = new CGSGNodeButton(580, 10, "Menu");
+      menuButton.setFixedSize(new CGSGDimension(50, 20));
+      menuButton.onClick = function () {
+        self.game.changeGameState(GAME_STATE.HOME);
+      };
+
+      this.gameNode.addChild(menuButton);
     },
 
     _createHud: function(gameNode) {
@@ -243,8 +264,8 @@ var StateGameRun = CGSGObject.extend(
       var wButton = 130;
       var hButton = 40;
       this.buttonGoBack =
-      new ButtonNode(CGSGMath.fixedPoint((cgsgCanvas.width - wButton - 10) / 2.0),
-               CGSGMath.fixedPoint((cgsgCanvas.height - hButton) / 1.5), wButton, hButton, 10);
+        new ButtonNode(CGSGMath.fixedPoint((cgsgCanvas.width - wButton - 10) / 2.0),
+          CGSGMath.fixedPoint((cgsgCanvas.height - hButton) / 1.5), wButton, hButton, 10);
       this.loseNode.addChild(this.buttonGoBack);
 
       var textGoBack = new CGSGNodeText(28, 18, "Go Home");
@@ -290,22 +311,22 @@ var StateGameRun = CGSGObject.extend(
       this.score = 0;
 
       /*this.nbLive = maxLive;
-      this.speed = 1;
+       this.speed = 1;
 
-      this.nbBees = 0;
-      this.nbFlowers = 0;
+       this.nbBees = 0;
+       this.nbFlowers = 0;
 
-      for (var f = 0; f < this.flowers.length; f++) {
-        this.flowers[f].isVisible = false;
-      }
+       for (var f = 0; f < this.flowers.length; f++) {
+       this.flowers[f].isVisible = false;
+       }
 
-      this.rootNode.reStartAnim();
-      currentColorLerp = 0;
-      currentColorIndex = 0;
-      this.isRunning = true;
+       this.rootNode.reStartAnim();
+       currentColorLerp = 0;
+       currentColorIndex = 0;
+       this.isRunning = true;
 
-      this.updateScore();
-      this.liveNode.reinit();*/
+       this.updateScore();
+       this.liveNode.reinit();*/
     },
 
     onKeyDown: function (event) {
