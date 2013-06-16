@@ -31,7 +31,6 @@ var StateAbout = CGSGObject.extend(
 
     setImage: function (image) {
       this.image = image;
-      this.bee.setImage(image);
     },
 
     _createEnvironment: function () {
@@ -76,10 +75,6 @@ var StateAbout = CGSGObject.extend(
       textBees.setSize(12);
       textBees.color = "#28323c";
       bck.addChild(textBees);
-
-      this.bee = new BeeNode(45, 155, this.context, this, 1);
-      this.bee.play("fly", null);
-      bck.addChild(this.bee);
 
       var textSceneGraph = new CGSGNodeText(3, 198, "cgSceneGraph");
       textSceneGraph.setSize(10);

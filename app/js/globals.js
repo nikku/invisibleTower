@@ -14,3 +14,5 @@ var currentColorLerp = 0;
 var currentColorIndex = 0;
 
 var maxLive = 6;
+
+var cellWidth = 30;
