@@ -20,15 +20,15 @@ var StateGameRun = CGSGObject.extend(
 
       // 0 = wall, 1 = open
       var map = this.map = [
-       [42,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0],
-         [0,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0],
-         [0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0],
-         [0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,43],
-         [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0],
-         [0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0],
-         [0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0],
-         [0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0]
+         [42,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,43],
+         [1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
       ];
 
       var graph = this.graph = new Graph(map);
@@ -111,22 +111,39 @@ var StateGameRun = CGSGObject.extend(
      * @private
      */
     _createGameEnvironment: function () {
-        this.gameNode = new CGSGNode(0, 0, 1, 1);
-        this.rootNode.addChild(this.gameNode);
+      this.gameNode = new CGSGNode(0, 0, 1, 1);
 
-        for (var index = 0; index < this.map.length; index++) {
-            var row = this.map[index];
-            for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
-                var cellType = row[rowIndex];
-                var width = 30;
-                var cellNode = new CGSGNodeSquare(rowIndex * width, index * width, width, width);
-                cellNode.globalAlpha = 0.8;
-                cellNode.color = cellType == 0 ? "lightgray" : "fuchsia";
-                cellNode.lineWidth = 2;
-                cellNode.lineColor = "gray";
-                this.gameNode.addChild(cellNode);
-            }
+      this.rootNode.addChild(this.gameNode);
+
+      for (var index = 0; index < this.map.length; index++) {
+        var row = this.map[index];
+        for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
+          var cellType = row[rowIndex];
+          var width = 30;
+          var cellNode = new CGSGNodeSquare(rowIndex * width, index * width, width, width);
+          cellNode.globalAlpha = 0.8;
+          cellNode.color = "lightgray";
+          cellNode.lineWidth = 2;
+          cellNode.lineColor = "gray";
+          this.gameNode.addChild(cellNode);
+
+          switch (cellType) {
+            case 0:
+              cellNode.addChild(new WallNode());
+              break;
+            case 42:
+              cellNode.addChild(new StartPointNode());
+              break;
+            case 43:
+              cellNode.addChild(new TowerNode());
+              break;
+          }
         }
+      }
+
+      var startButton = new NewButtonNode(580, 10, 50, 20, '(Re)Start');
+
+      this.gameNode.addChild(startButton);
     },
 
     /**
