@@ -28,7 +28,7 @@ var TowerNode = CGSGNodeSquare.extend(
       for (var attackerIndex = 0; attackerIndex < this.state.attackers.length; attackerIndex++) {
         var attacker = this.state.attackers[attackerIndex];
         console.log(attacker.position.x);
-        this.state.fireBullet(this.getAbsolutePosition(), attackerIndex);
+        this.state.fireBullet(this.getAbsolutePosition(), attackerIndex,34);
       }
       this.reload();
     }

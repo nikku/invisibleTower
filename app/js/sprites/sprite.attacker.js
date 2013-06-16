@@ -8,11 +8,14 @@
  */
 var AttackerNode = CGSGNodeSprite.extend(
   {
-    initialize: function (x, y, map, context, parentState, id) {
+    initialize: function (x, y, map, context, parentState, id, hitpoints, scorePoints) {
       this._super(x*cellWidth, y*cellWidth, null, context);
 
       this.parentState = parentState;
       this.id = id;
+      this.hitpoints = hitpoints;
+      this.scorePoints = scorePoints;
+      this.isDead = false;
 
       //name, speed, frames, sliceX, sliceY, width, height, framesPerLine
       this.addAnimation("fly", 4, 3, 0, 0, 16, 16, 1);
@@ -66,6 +69,19 @@ var AttackerNode = CGSGNodeSprite.extend(
       this.initPosAndSpeed();
       this.startAnim();
       */
+    },
+
+    hurt : function (attackValue) {
+      this.hitpoints -= attackValue;
+      if (this.hitpoints <= 0) {
+        this.kill();
+      }
+    },
+
+    kill : function () {
+      this.isDead = true;
+      this.parentState.updateScore(this.scorePoints);
+      this._parentNode.removeChild(this);
     }
   }
 );
