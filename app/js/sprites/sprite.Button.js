@@ -30,92 +30,92 @@
  *
  */
 var ButtonNode = CGSGNode.extend(
-	{
-		initialize: function (x, y, width, height, radius) {
-			//call the initialize of the parent
-			this._super(x, y, width, height);
+  {
+    initialize: function (x, y, width, height, radius) {
+      //call the initialize of the parent
+      this._super(x, y, width, height);
 
-			//define the classType with the name of the class
-			this.classType = "ButtonNode";
+      //define the classType with the name of the class
+      this.classType = "ButtonNode";
 
-			//define attributes of your custom node
-			this._firstColor = "white";
-			this._lastColor = "#dae3f2";
+      //define attributes of your custom node
+      this._firstColor = "white";
+      this._lastColor = "#dae3f2";
 
-			this.radius = radius;
+      this.radius = radius;
 
-			//fake canvas to pre-render static display
-			this._tmpCanvas = null;
+      //fake canvas to pre-render static display
+      this._tmpCanvas = null;
 
-			this.initShape();
-			this.resizeWith(this.radius * 2, this.radius * 2);
-		},
+      this.initShape();
+      this.resizeWith(this.radius * 2, this.radius * 2);
+    },
 
-		/**
-		 * Pre-render the cloud into a temp canvas to optimize the perfs
-		 */
-		initShape: function () {
-			this._tmpCanvas = document.createElement('canvas');
-			this._tmpCanvas.width = this.dimension.width + 2 * this.radius;
-			this._tmpCanvas.height = this.dimension.height + 2 * this.radius;
-			var tmpContext = this._tmpCanvas.getContext('2d');
+    /**
+     * Pre-render the cloud into a temp canvas to optimize the perfs
+     */
+    initShape: function () {
+      this._tmpCanvas = document.createElement('canvas');
+      this._tmpCanvas.width = this.dimension.width + 2 * this.radius;
+      this._tmpCanvas.height = this.dimension.height + 2 * this.radius;
+      var tmpContext = this._tmpCanvas.getContext('2d');
 
-			tmpContext.beginPath();
-			tmpContext.moveTo(/*this.position.x*/ this.radius + this.radius, /*this.position.y*/ this.radius);
-			tmpContext.lineTo(/*this.position.x*/ this.radius + this.dimension.width - this.radius, /*this.position.y*/
-												  this.radius);
-			tmpContext.quadraticCurveTo(/*this.position.x*/ this.radius + this.dimension.width, /*this.position.y*/
-															this.radius,
-				/*this.position.x*/ this.radius + this.dimension.width, /*this.position.y*/ this.radius + this.radius);
-			tmpContext.lineTo(/*this.position.x*/ this.radius + this.dimension.width,
-				/*this.position.y*/ this.radius + this.dimension.height - this.radius);
-			tmpContext.quadraticCurveTo(/*this.position.x*/ this.radius + this.dimension.width, /*this.position.y*/
-															this.radius + this.dimension.height,
-				/*this.position.x*/ this.radius + this.dimension.width - this.radius,
-				/*this.position.y*/ this.radius + this.dimension.height);
-			tmpContext.lineTo(/*this.position.x*/ this.radius + this.radius, /*this.position.y*/
-												  this.radius + this.dimension.height);
-			tmpContext.quadraticCurveTo(/*this.position.x*/ this.radius, /*this.position.y*/
-															this.radius + this.dimension.height,
-				/*this.position.x*/ this.radius,
-				/*this.position.y*/ this.radius + this.dimension.height - this.radius);
-			tmpContext.lineTo(/*this.position.x*/ this.radius, /*this.position.y*/ this.radius + this.radius);
-			tmpContext.quadraticCurveTo(/*this.position.x*/ this.radius, /*this.position.y*/ this.radius,
-				/*this.position.x*/
-															this.radius + this.radius,
-				/*this.position.y*/ this.radius);
-			tmpContext.closePath();
-			tmpContext.fill();
+      tmpContext.beginPath();
+      tmpContext.moveTo(/*this.position.x*/ this.radius + this.radius, /*this.position.y*/ this.radius);
+      tmpContext.lineTo(/*this.position.x*/ this.radius + this.dimension.width - this.radius, /*this.position.y*/
+                          this.radius);
+      tmpContext.quadraticCurveTo(/*this.position.x*/ this.radius + this.dimension.width, /*this.position.y*/
+                              this.radius,
+        /*this.position.x*/ this.radius + this.dimension.width, /*this.position.y*/ this.radius + this.radius);
+      tmpContext.lineTo(/*this.position.x*/ this.radius + this.dimension.width,
+        /*this.position.y*/ this.radius + this.dimension.height - this.radius);
+      tmpContext.quadraticCurveTo(/*this.position.x*/ this.radius + this.dimension.width, /*this.position.y*/
+                              this.radius + this.dimension.height,
+        /*this.position.x*/ this.radius + this.dimension.width - this.radius,
+        /*this.position.y*/ this.radius + this.dimension.height);
+      tmpContext.lineTo(/*this.position.x*/ this.radius + this.radius, /*this.position.y*/
+                          this.radius + this.dimension.height);
+      tmpContext.quadraticCurveTo(/*this.position.x*/ this.radius, /*this.position.y*/
+                              this.radius + this.dimension.height,
+        /*this.position.x*/ this.radius,
+        /*this.position.y*/ this.radius + this.dimension.height - this.radius);
+      tmpContext.lineTo(/*this.position.x*/ this.radius, /*this.position.y*/ this.radius + this.radius);
+      tmpContext.quadraticCurveTo(/*this.position.x*/ this.radius, /*this.position.y*/ this.radius,
+        /*this.position.x*/
+                              this.radius + this.radius,
+        /*this.position.y*/ this.radius);
+      tmpContext.closePath();
+      tmpContext.fill();
 
-			var gradient = tmpContext.createLinearGradient(0, 0, 0, this.dimension.height);
-			gradient.addColorStop(0, this._firstColor);
-			gradient.addColorStop(1, this._lastColor);
-			tmpContext.fillStyle = gradient;
+      var gradient = tmpContext.createLinearGradient(0, 0, 0, this.dimension.height);
+      gradient.addColorStop(0, this._firstColor);
+      gradient.addColorStop(1, this._lastColor);
+      tmpContext.fillStyle = gradient;
 
-			tmpContext.shadowColor = 'white';
-			tmpContext.shadowBlur = 10;
-			tmpContext.shadowOffsetX = 0;
-			tmpContext.shadowOffsetY = 0;
+      tmpContext.shadowColor = 'white';
+      tmpContext.shadowBlur = 10;
+      tmpContext.shadowOffsetX = 0;
+      tmpContext.shadowOffsetY = 0;
 
-			tmpContext.fill();
-		},
+      tmpContext.fill();
+    },
 
-		/**
-		 * Must be defined to allow the scene graph to render the image nodes
-		 * */
-		render: function (context) {
-			//save current state
-			//always call it
-			this.beforeRender(context);
+    /**
+     * Must be defined to allow the scene graph to render the image nodes
+     * */
+    render: function (context) {
+      //save current state
+      //always call it
+      this.beforeRender(context);
 
-			context.globalAlpha = this.globalAlpha;
+      context.globalAlpha = this.globalAlpha;
 
-			//render the pre-rendered canvas
-			context.drawImage(this._tmpCanvas, 0, 0);
+      //render the pre-rendered canvas
+      context.drawImage(this._tmpCanvas, 0, 0);
 
-			//restore state
-			//always call it
-			this.afterRender(context);
-		}
-	}
+      //restore state
+      //always call it
+      this.afterRender(context);
+    }
+  }
 );

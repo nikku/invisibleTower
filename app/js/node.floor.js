@@ -30,107 +30,107 @@
  *
  */
 var FloorNode = CGSGNode.extend(
-	{
-		initialize: function (x, y, width, height) {
-			//call the initialize of the parent
-			this._super(x, y, width, height);
+  {
+    initialize: function (x, y, width, height) {
+      //call the initialize of the parent
+      this._super(x, y, width, height);
 
-			//define the classType with the name of the class
-			this.classType = "FloorNode";
+      //define the classType with the name of the class
+      this.classType = "FloorNode";
 
-			//define attributes of your custom node
-			this.firstColors = ["#63d957", "#528363", "#294131", "#528363", "#63d957"];
-			this.lastColors = ["#6fac69", "#163f18", "#052c06", "#163f18", "#6fac69"];
-			this.flowerColors = ["#f0eb69", "#ac9a5b", "#655f32", "#beb565", "#f0eb69"];
+      //define attributes of your custom node
+      this.firstColors = ["#63d957", "#528363", "#294131", "#528363", "#63d957"];
+      this.lastColors = ["#6fac69", "#163f18", "#052c06", "#163f18", "#6fac69"];
+      this.flowerColors = ["#f0eb69", "#ac9a5b", "#655f32", "#beb565", "#f0eb69"];
 
-			//fake canvas to pre-render static display
-			this._tmpCanvas = null;
+      //fake canvas to pre-render static display
+      this._tmpCanvas = null;
 
-			this.isClickable = false;
+      this.isClickable = false;
 
-			this.flowersPosition = [];
-			var centerX = 0;
-			var centerY = 0;
-			var radius = 1;
-			for (var s = 0; s < 5; s++) {
-				centerX = Math.random() * cgsgCanvas.width;
-				centerY = cgsgCanvas.height - Math.random() * 100;
-				radius = 2 + Math.random() * 2.3;
-				this.flowersPosition.push({x: centerX, y: centerY, r: radius});
-			}
-		},
+      this.flowersPosition = [];
+      var centerX = 0;
+      var centerY = 0;
+      var radius = 1;
+      for (var s = 0; s < 5; s++) {
+        centerX = Math.random() * cgsgCanvas.width;
+        centerY = cgsgCanvas.height - Math.random() * 100;
+        radius = 2 + Math.random() * 2.3;
+        this.flowersPosition.push({x: centerX, y: centerY, r: radius});
+      }
+    },
 
-		/**
-		 * Must be defined to allow the scene graph to render the image nodes
-		 * */
-		render: function (context) {
-			this.firstColorCurrent =
-			CGSGColor.lerp(this.firstColors[currentColorIndex], this.firstColors[currentColorIndex + 1],
-						   currentColorLerp);
-			this.lastColorCurrent =
-			CGSGColor.lerp(this.lastColors[currentColorIndex], this.lastColors[currentColorIndex + 1],
-						   currentColorLerp);
-			this.flowerColorCurrent =
-			CGSGColor.lerp(this.flowerColors[currentColorIndex], this.flowerColors[currentColorIndex + 1],
-						   currentColorLerp);
+    /**
+     * Must be defined to allow the scene graph to render the image nodes
+     * */
+    render: function (context) {
+      this.firstColorCurrent =
+      CGSGColor.lerp(this.firstColors[currentColorIndex], this.firstColors[currentColorIndex + 1],
+               currentColorLerp);
+      this.lastColorCurrent =
+      CGSGColor.lerp(this.lastColors[currentColorIndex], this.lastColors[currentColorIndex + 1],
+               currentColorLerp);
+      this.flowerColorCurrent =
+      CGSGColor.lerp(this.flowerColors[currentColorIndex], this.flowerColors[currentColorIndex + 1],
+               currentColorLerp);
 
-			//save current state
-			//always call it
-			this.beforeRender(context);
+      //save current state
+      //always call it
+      this.beforeRender(context);
 
-			context.globalAlpha = this.globalAlpha;
+      context.globalAlpha = this.globalAlpha;
 
-			//render the pre-rendered canvas
-			//context.drawImage(this._tmpCanvas, 0, 0);
+      //render the pre-rendered canvas
+      //context.drawImage(this._tmpCanvas, 0, 0);
 
-			var startX = -50;
-			var startY = 140;
+      var startX = -50;
+      var startY = 140;
 
-			context.save();
+      context.save();
 
-			context.scale(3, 2);
+      context.scale(3, 2);
 
-			// draw cloud shape
-			context.beginPath();
-			context.moveTo(startX, startY);
+      // draw cloud shape
+      context.beginPath();
+      context.moveTo(startX, startY);
 
-			context.bezierCurveTo(startX - 10, startY + 20, startX - 40, startY + 70,
-								  startX + 30, startY + 70);
-			context.bezierCurveTo(startX + 60, startY + 60, startX + 250,
-								  startY + 40, startX + 220, startY + 20);
-			context.bezierCurveTo(startX + 240, startY - 40, startX + 200, startY - 50,
-								  startX + 170, startY - 30);
-			context.bezierCurveTo(startX + 50, startY - 60,
-								  startX, startY - 30, startX, startY); //left-top
+      context.bezierCurveTo(startX - 10, startY + 20, startX - 40, startY + 70,
+                  startX + 30, startY + 70);
+      context.bezierCurveTo(startX + 60, startY + 60, startX + 250,
+                  startY + 40, startX + 220, startY + 20);
+      context.bezierCurveTo(startX + 240, startY - 40, startX + 200, startY - 50,
+                  startX + 170, startY - 30);
+      context.bezierCurveTo(startX + 50, startY - 60,
+                  startX, startY - 30, startX, startY); //left-top
 
-			context.closePath();
+      context.closePath();
 
-			var gradient = context.createLinearGradient(startX, startY / 1.3, startX, cgsgCanvas.height / 2);
-			gradient.addColorStop(0, this.firstColorCurrent);
-			gradient.addColorStop(1, this.lastColorCurrent);
-			context.fillStyle = gradient;
+      var gradient = context.createLinearGradient(startX, startY / 1.3, startX, cgsgCanvas.height / 2);
+      gradient.addColorStop(0, this.firstColorCurrent);
+      gradient.addColorStop(1, this.lastColorCurrent);
+      context.fillStyle = gradient;
 
-			context.shadowColor = "#55e147";
-			context.shadowBlur = 40;
-			context.shadowOffsetX = 0;
-			context.shadowOffsetY = 0;
+      context.shadowColor = "#55e147";
+      context.shadowBlur = 40;
+      context.shadowOffsetX = 0;
+      context.shadowOffsetY = 0;
 
-			context.fill();
-			context.restore();
+      context.fill();
+      context.restore();
 
-			//draw some little flowers
-			context.shadowBlur = 0;
-			for (var s = 0; s < this.flowersPosition.length; s++) {
-				context.beginPath();
-				context.arc(this.flowersPosition[s].x, this.flowersPosition[s].y, this.flowersPosition[s].r, 0,
-							CGSGMath.PI2, false);
-				context.fillStyle = this.flowerColorCurrent;
-				context.fill();
-			}
+      //draw some little flowers
+      context.shadowBlur = 0;
+      for (var s = 0; s < this.flowersPosition.length; s++) {
+        context.beginPath();
+        context.arc(this.flowersPosition[s].x, this.flowersPosition[s].y, this.flowersPosition[s].r, 0,
+              CGSGMath.PI2, false);
+        context.fillStyle = this.flowerColorCurrent;
+        context.fill();
+      }
 
-			//restore state
-			//always call it
-			this.afterRender(context);
-		}
-	}
+      //restore state
+      //always call it
+      this.afterRender(context);
+    }
+  }
 );
