@@ -139,8 +139,14 @@ var StateGameRun = CGSGObject.extend(
         }
       }
 
-      var startButton = new NewButtonNode(580, 10, 50, 20, '(Re)Start');
-      this.gameNode.addChild(startButton);
+      var self = this;
+      var menuButton = new CGSGNodeButton(580, 10, "Menu");
+      menuButton.setFixedSize(new CGSGDimension(50, 20));
+      menuButton.onClick = function () {
+        self.game.changeGameState(GAME_STATE.HOME);
+      };
+
+      this.gameNode.addChild(menuButton);
     },
 
     _createHud: function(gameNode) {
