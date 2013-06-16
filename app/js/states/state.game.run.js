@@ -132,7 +132,7 @@ var StateGameRun = CGSGObject.extend(
               cellNode.addChild(new StartPointNode());
               break;
             case 43:
-              cellNode.addChild(new TowerNode());
+              cellNode.addChild(new EndPointNode());
               break;
           }
         }
