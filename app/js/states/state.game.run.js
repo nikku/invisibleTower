@@ -49,12 +49,16 @@ var StateGameRun = CGSGObject.extend(
      */
     run: function () {
       this.initGame();
+      var self = this;
 
-      for (var b = 0; b < this.attackers.length; b++) {
-        this.attackers[b].setImage(this.image);
-      }
+      setInterval(function () {
+        var bee = new AttackerNode(0, 0, self.map, self.context, self, 1, 100, 1);
+        bee.setImage(self.image);
+        self.attackers.push(bee);
+        self.gameNode.addChild(bee);
+        bee.start();
+      }, 750);
 
-      this.attackers[0].start();
       this.updateScore(this.score);
     },
 
@@ -104,11 +108,6 @@ var StateGameRun = CGSGObject.extend(
 
       this._createGameGrid(this.gameNode);
       this._createHud(this.gameNode);
-
-      var bee = new AttackerNode(0, 0, this.map, this.context, this, 1, 100, 1);
-      this.attackers.push(bee);
-
-      this.gameNode.addChild(bee);
     },
 
     _createGameGrid: function(gameNode) {
